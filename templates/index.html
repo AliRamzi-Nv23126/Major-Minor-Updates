@@ -10,7 +10,14 @@
     <ul>
         {% for task in tasks %}
         <li>
-            {{ task.title }} - {{ 'Done' if task.done else 'Pending' }}
+            <strong>{{ task.title }}</strong> - {{ task.status }} - Priority: {{ task.priority }}
+            {% if task.due_date %}
+            - Due: {{ task.due_date }}
+            {% endif %}
+            {% if task.description %}
+            <br>Description: {{ task.description }}
+            {% endif %}
+            <br>
             <a href="{{ url_for('edit', id=task.id) }}">Edit</a>
             <a href="{{ url_for('delete', id=task.id) }}">Delete</a>
         </li>

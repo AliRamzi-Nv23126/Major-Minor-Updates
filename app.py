@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField
+from wtforms import StringField, SubmitField, BooleanField, TextAreaField, SelectField, DateField
 from wtforms.validators import DataRequired
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -12,11 +13,19 @@ db = SQLAlchemy(app)
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    done = db.Column(db.Boolean, default=False)
+    description = db.Column(db.Text)
+    priority = db.Column(db.String(20), default='medium')  # low, medium, high
+    due_date = db.Column(db.Date)
+    status = db.Column(db.String(20), default='pending')  # pending, in_progress, done
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class TaskForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    done = BooleanField('Done')
+    description = TextAreaField('Description')
+    priority = SelectField('Priority', choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], default='medium')
+    due_date = DateField('Due Date', format='%Y-%m-%d')
+    status = SelectField('Status', choices=[('pending', 'Pending'), ('in_progress', 'In Progress'), ('done', 'Done')], default='pending')
     submit = SubmitField('Submit')
 
 @app.route('/')
@@ -28,7 +37,13 @@ def index():
 def add():
     form = TaskForm()
     if form.validate_on_submit():
-        task = Task(title=form.title.data, done=form.done.data)
+        task = Task(
+            title=form.title.data,
+            description=form.description.data,
+            priority=form.priority.data,
+            due_date=form.due_date.data,
+            status=form.status.data
+        )
         db.session.add(task)
         db.session.commit()
         return redirect(url_for('index'))
@@ -40,12 +55,18 @@ def edit(id):
     form = TaskForm()
     if form.validate_on_submit():
         task.title = form.title.data
-        task.done = form.done.data
+        task.description = form.description.data
+        task.priority = form.priority.data
+        task.due_date = form.due_date.data
+        task.status = form.status.data
         db.session.commit()
         return redirect(url_for('index'))
     elif request.method == 'GET':
         form.title.data = task.title
-        form.done.data = task.done
+        form.description.data = task.description
+        form.priority.data = task.priority
+        form.due_date.data = task.due_date
+        form.status.data = task.status
     return render_template('edit.html', form=form)
 
 @app.route('/delete/<int:id>')

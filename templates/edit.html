@@ -9,7 +9,10 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         {{ form.title.label }} {{ form.title() }}<br>
-        {{ form.done() }} {{ form.done.label }}<br>
+        {{ form.description.label }} {{ form.description() }}<br>
+        {{ form.priority.label }} {{ form.priority() }}<br>
+        {{ form.due_date.label }} {{ form.due_date() }}<br>
+        {{ form.status.label }} {{ form.status() }}<br>
         {{ form.submit() }}
     </form>
     <a href="{{ url_for('index') }}">Back</a>
