@@ -30,8 +30,14 @@ class TaskForm(FlaskForm):
 
 @app.route('/')
 def index():
-    tasks = Task.query.all()
-    return render_template('index.html', tasks=tasks)
+    q = request.args.get('q', '')
+    if q:
+        tasks = Task.query.filter(
+            (Task.title.contains(q)) | (Task.description.contains(q))
+        ).all()
+    else:
+        tasks = Task.query.all()
+    return render_template('index.html', tasks=tasks, q=q)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
