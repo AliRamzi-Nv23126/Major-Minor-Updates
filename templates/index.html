@@ -8,7 +8,24 @@
     <h1>ToDo List</h1>
     <form method="GET">
         <input type="text" name="q" value="{{ q }}" placeholder="Search tasks...">
-        <input type="submit" value="Search">
+        <select name="status">
+            <option value="">All Status</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Done</option>
+        </select>
+        <select name="priority">
+            <option value="">All Priority</option>
+            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+        </select>
+        <select name="sort">
+            <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Created Date</option>
+            <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due Date</option>
+            <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority</option>
+        </select>
+        <input type="submit" value="Filter">
     </form>
     <a href="{{ url_for('add') }}">Add Task</a>
     <ul>

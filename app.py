@@ -31,13 +31,34 @@ class TaskForm(FlaskForm):
 @app.route('/')
 def index():
     q = request.args.get('q', '')
+    status_filter = request.args.get('status', '')
+    priority_filter = request.args.get('priority', '')
+    sort_by = request.args.get('sort', 'created_at')
+
+    query = Task.query
     if q:
-        tasks = Task.query.filter(
+        query = query.filter(
             (Task.title.contains(q)) | (Task.description.contains(q))
-        ).all()
+        )
+    if status_filter:
+        query = query.filter(Task.status == status_filter)
+    if priority_filter:
+        query = query.filter(Task.priority == priority_filter)
+
+    if sort_by == 'due_date':
+        query = query.order_by(Task.due_date)
+    elif sort_by == 'priority':
+        # Simple sort: high > medium > low
+        query = query.order_by(db.case(
+            (Task.priority == 'high', 1),
+            (Task.priority == 'medium', 2),
+            (Task.priority == 'low', 3)
+        ))
     else:
-        tasks = Task.query.all()
-    return render_template('index.html', tasks=tasks, q=q)
+        query = query.order_by(Task.created_at.desc())
+
+    tasks = query.all()
+    return render_template('index.html', tasks=tasks, q=q, status_filter=status_filter, priority_filter=priority_filter, sort_by=sort_by)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
